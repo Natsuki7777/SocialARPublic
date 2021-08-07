@@ -55,17 +55,17 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 viewer.scene.globe.depthTestAgainstTerrain = true;
 var tileset1 = viewer.scene.primitives.add(
   new Cesium.Cesium3DTileset({
-    url: "./src/assets/13110_meguro-ku/tileset.json",
+    url: Cesium.IonResource.fromAssetId(510091),
   })
 );
 var tileset2 = viewer.scene.primitives.add(
   new Cesium.Cesium3DTileset({
-    url: "./src/assets/13111_ota-ku/tileset.json",
+    url: Cesium.IonResource.fromAssetId(510093),
   })
 );
 var tileset3 = viewer.scene.primitives.add(
   new Cesium.Cesium3DTileset({
-    url: "./src/assets/13112_setagaya-ku/tileset.json",
+    url: Cesium.IonResource.fromAssetId(510456),
   })
 );
 
