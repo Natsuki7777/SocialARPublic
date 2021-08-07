@@ -16,7 +16,6 @@ var modelRef = firebase.database().ref("/titech");
 
 //--------------load models------------------------------
 window.addEventListener("load", () => {
-  console.log("loaded");
   modelRef.on("value", (snapshot) => {
     const gltfModels = snapshot.val();
     console.dir(gltfModels);
