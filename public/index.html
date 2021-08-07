@@ -23,6 +23,8 @@
       </div>
     <button class="collapsible" id="addNewModel">新しい3Dモデルをアップロード</button>
       <div class="content">
+        <p>現在 <a style="color:aqua" href="https://docs.blender.org/manual/ja/dev/addons/import_export/scene_gltf2.html#gltf-embedded-gltf" target="_blank" rel="noopener noreferrer">glTF2.0</a>形式の3DObjectのみアップロード可能</p>
+        <p>拡散子を「.gltf」にしてください。</p>
           <input id="gltfInput" type="file" accept=".gltf" onchange="onFileSelect( this );">
           <input id="newModelName" type="text">
           <button id="uploadNewModel">アップロード</button>
