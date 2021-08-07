@@ -25,6 +25,27 @@ window.addEventListener("load", () => {
     document.getElementById("uploadNewModel").addEventListener("click", () => {
       newModelUploadAndAdd(gltfModels);
     });
+    storage
+      .ref("/3Dmodel")
+      .listAll()
+      .then((res) => {
+        console.log(res);
+        res.items.forEach((ref) => {
+          let modelname = ref.name;
+          if (document.getElementById(`addButton${modelname}`)) {
+          } else {
+            const addModelButton = document.createElement("button");
+            addModelButton.innerHTML = modelname;
+            addModelButton.id = `addButton${modelname}`;
+            addModelButton.addEventListener("click", () => {
+              add3Dmodel(gltfModels, modelname);
+            });
+            document
+              .getElementById("addModelButtons")
+              .appendChild(addModelButton);
+          }
+        });
+      });
   });
 });
 
@@ -102,22 +123,6 @@ viewer.camera.flyTo({
 });
 
 // ------------- adding abalable model list at add model ------------------
-storage
-  .ref("/3Dmodel")
-  .listAll()
-  .then((res) => {
-    console.log(res);
-    res.items.forEach((ref) => {
-      modelname = ref.name;
-      const addModelButton = document.createElement("button");
-      addModelButton.innerHTML = modelname;
-      addModelButton.id = `addButton${modelname}`;
-      addModelButton.addEventListener("click", () => {
-        add3Dmodel(data, modelname);
-      });
-      document.getElementById("addModelButtons").appendChild(addModelButton);
-    });
-  });
 
 //--------make entitis from firebase realtime database-----------
 function createEntities(data) {
@@ -202,6 +207,7 @@ function createEntities(data) {
           entityButton.appendChild(entityModel);
           entityButton.addEventListener("click", () => {
             viewer.flyTo(viewer.entities.getById(ID));
+            showOnViewer(ID);
           });
           modelListContainer.appendChild(entityButton);
         }
@@ -224,45 +230,50 @@ function pickEntity(viewer, windowPosition) {
       // console.log(entity.position);
       // let cartesian = entity.position.getValue();
       // var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-      let gltf = entity.dataRef;
-      document.getElementById("modelId").innerHTML = id;
-      document.getElementById("modelName").value = gltf.name;
-      document.getElementById("modelLatitude").value = gltf.location.latitude;
-      document.getElementById("modelLongitude").value = gltf.location.longitude;
-      document.getElementById("modelHeight").value = gltf.location.height;
-      document.getElementById("modelLabel").checked = gltf.label;
-      document.getElementById("modelDistance").checked = gltf.distance;
-      document.getElementById("modelLink").value = gltf.link;
-      document.getElementById("modelCaption").value = gltf.caption;
-      let url = entity.model.uri.getValue();
-      let oldel = document.getElementById("viewerModel");
-      let newel = document.createElement("a-entity");
-      newel.setAttribute("id", "viewerModel");
-      newel.setAttribute("gltf-model", `url(${url})`);
-      newel.setAttribute("animation-mixer", "");
-      newel.setAttribute("response-type", "arraybuffer");
-      let scene = document.querySelector("a-scene");
-      scene.replaceChild(newel, oldel);
-      if (gltf.label) {
-        let labeltext = document.getElementById("viewerModelLabel");
-        labeltext.setAttribute("value", gltf.name);
-      } else {
-        let labeltext = document.getElementById("viewerModelLabel");
-        labeltext.setAttribute("value", "");
-      }
-      if (gltf.distance) {
-        let labeltext = document.getElementById("viewerModelDistance");
-        labeltext.setAttribute("value", "10m");
-      } else {
-        let labeltext = document.getElementById("viewerModelDistance");
-        labeltext.setAttribute("value", "");
-      }
-      let modelViewer = document.getElementById("nowModel");
-      if (modelViewer.classList.contains("active")) {
-      } else {
-        document.getElementById("nowModel").click();
-      }
+      showOnViewer(id);
     }
+  }
+}
+
+function showOnViewer(id) {
+  let entity = viewer.entities.getById(id);
+  let gltf = entity.dataRef;
+  document.getElementById("modelId").innerHTML = id;
+  document.getElementById("modelName").value = gltf.name;
+  document.getElementById("modelLatitude").value = gltf.location.latitude;
+  document.getElementById("modelLongitude").value = gltf.location.longitude;
+  document.getElementById("modelHeight").value = gltf.location.height;
+  document.getElementById("modelLabel").checked = gltf.label;
+  document.getElementById("modelDistance").checked = gltf.distance;
+  document.getElementById("modelLink").value = gltf.link;
+  document.getElementById("modelCaption").value = gltf.caption;
+  let url = entity.model.uri.getValue();
+  let oldel = document.getElementById("viewerModel");
+  let newel = document.createElement("a-entity");
+  newel.setAttribute("id", "viewerModel");
+  newel.setAttribute("gltf-model", `url(${url})`);
+  newel.setAttribute("animation-mixer", "");
+  newel.setAttribute("response-type", "arraybuffer");
+  let scene = document.querySelector("a-scene");
+  scene.replaceChild(newel, oldel);
+  if (gltf.label) {
+    let labeltext = document.getElementById("viewerModelLabel");
+    labeltext.setAttribute("value", gltf.name);
+  } else {
+    let labeltext = document.getElementById("viewerModelLabel");
+    labeltext.setAttribute("value", "");
+  }
+  if (gltf.distance) {
+    let labeltext = document.getElementById("viewerModelDistance");
+    labeltext.setAttribute("value", "10m");
+  } else {
+    let labeltext = document.getElementById("viewerModelDistance");
+    labeltext.setAttribute("value", "");
+  }
+  let modelViewer = document.getElementById("nowModel");
+  if (modelViewer.classList.contains("active")) {
+  } else {
+    document.getElementById("nowModel").click();
   }
 }
 
@@ -355,6 +366,7 @@ document.getElementById("deleteModel").addEventListener("click", () => {
     modelRef.child(`/${id}`).remove();
     let entity = viewer.entities.getById(`${id}`);
     viewer.entities.remove(entity);
+    document.getElementById(`entityListID${id}`).remove();
   }
 });
 
@@ -439,7 +451,8 @@ for (colli = 0; colli < coll.length; colli++) {
 }
 
 //--------------------adding new 3dmodel-------------------
-function add3Dmodel(data, modelName) {
+function add3Dmodel(data, model) {
+  (modelName = model.slice(0, -5)), console.log(modelName);
   let newId =
     Math.max(...Object.keys(data).map((str) => parseInt(str, 10))) + 1;
   let ref = storage.ref(`/3Dmodel/${modelName}.gltf`).getDownloadURL();
