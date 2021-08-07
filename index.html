@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.82/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.82/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://unpkg.com/aframe-orbit-controls@1.2.0/dist/aframe-orbit-controls.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="./src/style.css">
+</head>
+<body>
+  <div id="cesiumContainer" ></div>
+  <div class="backdrop" id="menu">
+    <button class="collapsible"　id="modelList">配置リスト</button>
+    <div  class="content">
+      <table id="modelListContainer">
+      </table>
+    </div>
+    <button class="collapsible"　id="addAssetModel"> 3Dモデルを追加</button>
+      <div id="addModelButtons" class="content">
+      </div>
+    <button class="collapsible" id="addNewModel">新しい3Dモデルをアップロード</button>
+      <div class="content">
+          <input id="gltfInput" type="file" accept=".gltf" onchange="onFileSelect( this );">
+          <input id="newModelName" type="text">
+          <button id="uploadNewModel">アップロード</button>
+      </div>
+  </div>
+  <div class="backdrop" id= "modelView">
+    <button class="collapsible" id="nowModel">選択中の3Dモデル</button>
+    <div class="content">
+      <table>
+        <tr>
+          <button onClick="flyToSelectedModel()">モデルへ飛ぶ</button>
+        </tr>
+        <tr>
+          <td>Model ID</td><td id="modelId" ></td>
+        </tr>
+        <tr>
+          <td>Model Name</td><td  ><input id="modelName" type="text" onchange="changeModelProperty()"></td>
+        </tr>
+        <tr>
+          <td>緯度</td><td><input id="modelLatitude" type="number"  onchange="changeModelProperty()">°</td>
+        </tr>
+        <tr>
+          <td>経度</td><td><input id="modelLongitude" type="number" onchange="changeModelProperty()">°</td>
+        </tr>
+        <tr>
+          <td>高さ</td><td><input id="modelHeight" type="number"   onchange="changeModelProperty()">m</td>
+        </tr>
+      </table>
+      <div>
+        <a-scene  vr-mode-ui="enabled: false" embedded>
+          <a-sky color="#ECECEC"></a-sky>
+          <a-entity id="viewerModel">
+          </a-entity>
+          <a-text 
+          id="viewerModelLabel"
+          font-image="./src/assets/font/noto-sans-cjk-jp-msdf.png" 
+          font="./src/assets/font/noto-sans-cjk-jp-msdf.json" 
+          scale="50 50 50" 
+          color="black"
+          negate=false
+          position="5 5.0 0">
+          </a-text>
+          <a-text 
+          id="viewerModelDistance"
+          font-image="./src/assets/font/noto-sans-cjk-jp-msdf.png" 
+          font="./src/assets/font/noto-sans-cjk-jp-msdf.json" 
+          scale="50 50 50" 
+          color="black"
+          negate=false
+          position="5 -5.0 0">
+          </a-text>
+        <a-entity
+          camera
+          look-controls
+          orbit-controls="target: 0 1.6 -0.5; minDistance: 0.5; maxDistance: 180; initialPosition: 0 5 15"
+        ></a-entity>
+        </a-scene>
+      </div>
+      <table>
+        <tr>
+          <td>名前の表示</td><td><input type="checkbox" id="modelLabel" onchange="changeModelData()"/></td>
+        </tr>
+        <tr>
+          <td>距離の表示</td><td><input type="checkbox" id="modelDistance" onchange="changeModelData()"/></td>
+        </tr>
+        <tr>
+          <td>リンク</td><td><input  id="modelLink" onchange="changeModelData()"/></td>
+        </tr>
+        <tr>
+          <td>キャプション</td><td><input id="modelCaption" onchange="changeModelData()"/></td>
+        </tr>
+        <td><button id="deleteModel">削除</button></td>
+      </table>
+    </div>
+  </div>
+
+  <div class="backdrop" id="rightclickposition">
+    <table>
+      <tr>
+        <td>右クリック位置</td>
+        <td><button id="copyLatLon">貼り付ける</button></td> 
+      </tr>
+      <tr>
+        <td>
+          緯度
+        </td>  
+        <td id="mousePositionLatitude"></td>
+      </tr>
+      <tr>
+        <td>
+          経度
+        </td>  
+        <td id="mousePositionLongitude"></td>
+      </tr>
+      <tr>
+        <td>緯度経度表示</td><td><input type="checkbox" id="latlonDisplay" onchange="latlonDisplay()" checked/></td>
+      </tr>
+    </table>
+  </div>
+
+  
+  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-app.js"></script>
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-analytics.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-database.js"></script>
+  <script src="./src/script.js"></script>
+ </div>
+</body>
+</html>
