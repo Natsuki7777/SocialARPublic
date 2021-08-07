@@ -2,6 +2,8 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBntUepSNXM7FhJBHUyisYBcJi7vqni54M",
   authDomain: "socialarpublic1.firebaseapp.com",
+  databaseURL:
+    "https://socialarpublic1-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "socialarpublic1",
   storageBucket: "socialarpublic1.appspot.com",
   messagingSenderId: "591109157331",
