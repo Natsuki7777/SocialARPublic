@@ -25,29 +25,33 @@ window.addEventListener("load", () => {
     document.getElementById("uploadNewModel").addEventListener("click", () => {
       newModelUploadAndAdd(gltfModels);
     });
-    storage
-      .ref("/3Dmodel")
-      .listAll()
-      .then((res) => {
-        console.log(res);
-        res.items.forEach((ref) => {
-          let modelname = ref.name;
-          if (document.getElementById(`addButton${modelname}`)) {
-          } else {
-            const addModelButton = document.createElement("button");
-            addModelButton.innerHTML = modelname;
-            addModelButton.id = `addButton${modelname}`;
-            addModelButton.addEventListener("click", () => {
-              add3Dmodel(gltfModels, modelname);
-            });
-            document
-              .getElementById("addModelButtons")
-              .appendChild(addModelButton);
-          }
-        });
-      });
+    add3db(gltfModels);
   });
 });
+
+function add3db(gltfModels) {
+  storage
+    .ref("/3Dmodel")
+    .listAll()
+    .then((res) => {
+      console.log(res);
+      res.items.forEach((ref) => {
+        let modelname = ref.name;
+        if (document.getElementById(`addButton${modelname}`)) {
+        } else {
+          const addModelButton = document.createElement("button");
+          addModelButton.innerHTML = modelname;
+          addModelButton.id = `addButton${modelname}`;
+          addModelButton.addEventListener("click", () => {
+            add3Dmodel(gltfModels, modelname);
+          });
+          document
+            .getElementById("addModelButtons")
+            .appendChild(addModelButton);
+        }
+      });
+    });
+}
 
 //---------------------Cesium 基本設定----------------------------------------
 Cesium.Ion.defaultAccessToken =
@@ -539,7 +543,7 @@ function onFileSelect(inputElement) {
   newModelName.value = filename;
 }
 
-function newModelUploadAndAdd(data) {
+function newModelUploadAndAdd(gltfModels) {
   if (document.getElementById("newModelName").value) {
     console.log("pushed upload");
     let gltfInput = document.getElementById("gltfInput");
@@ -555,7 +559,7 @@ function newModelUploadAndAdd(data) {
           var progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log("Upload is " + progress + "% done");
-          add3Dmodel(data, newModelName);
+          add3db(gltfModels);
         },
         (error) => {
           console.log(error);
