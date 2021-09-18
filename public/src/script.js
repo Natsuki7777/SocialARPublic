@@ -52,7 +52,6 @@ function add3db(gltfModels) {
       });
     });
 }
-
 //---------------------Cesium 基本設定----------------------------------------
 Cesium.Ion.defaultAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxOWNiZmM2OC1mMzA4LTRlM2UtOTc0OS1jNWMwYjk4MzM2YmQiLCJpZCI6NTg3MjUsImlhdCI6MTYyNzgzMDkyNn0.eXZA6FknYoWPrVWC3bUIePW_tnIeVnkJaci4Uq1Qgak";
@@ -67,15 +66,15 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
     url: "https://a.tile.openstreetmap.org/",
   }),
   infoBox: false,
-  shadows: true,
+  shadows: false,
   shouldAnimate: true,
-  geocoder: false,
+  geocoder: true,
   sceneModePicker: false,
   baseLayerPicker: false,
   navigationHelpButton: false,
-  animation: false,
-  timeline: false,
-  homeButton: false,
+  animation: true,
+  timeline: true,
+  homeButton: true,
 });
 viewer.scene.globe.depthTestAgainstTerrain = true;
 var tileset1 = viewer.scene.primitives.add(
@@ -113,12 +112,12 @@ var homeCameraView = {
   },
 };
 // Override the default home button
-// viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (
-//   e
-// ) {
-//   e.cancel = true;
-//   viewer.scene.camera.flyTo(homeCameraView);
-// });
+viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (
+  e
+) {
+  e.cancel = true;
+  viewer.scene.camera.flyTo(homeCameraView);
+});
 
 viewer.camera.flyTo({
   destination: initialPosition,
@@ -456,7 +455,8 @@ for (colli = 0; colli < coll.length; colli++) {
 
 //--------------------adding new 3dmodel-------------------
 function add3Dmodel(data, model) {
-  (modelName = model.slice(0, -5)), console.log(modelName);
+  modelName = model.slice(0, -5);
+  console.log(modelName);
   let newId =
     Math.max(...Object.keys(data).map((str) => parseInt(str, 10))) + 1;
   let ref = storage.ref(`/3Dmodel/${modelName}.gltf`).getDownloadURL();
@@ -469,21 +469,6 @@ function add3Dmodel(data, model) {
       let positionLongitude = parseFloat(
         document.getElementById("mousePositionLongitude").innerHTML
       );
-      // ----- firebaseがやってくれる----------------
-      // let positions = [
-      //   Cesium.Cartographic.fromDegrees(positionLongitude, positionLatitude),
-      // ];
-      // let promise = Cesium.sampleTerrainMostDetailed(
-      //   viewer.terrainProvider,
-      //   positions
-      // );
-      // Cesium.when(promise, function (updatedPositions) {
-      //   let height = updatedPositions[0].height;
-      //   let addingLocation = Cesium.Cartesian3.fromDegrees(
-      //     positionLongitude,
-      //     positionLatitude,
-      //     height
-      //   );
       let dataRef = {
         name: "New 3DObject",
         location: {
@@ -506,8 +491,6 @@ function add3Dmodel(data, model) {
         .then(() => {
           viewer.flyTo(viewer.entities.getById(`${newId}`));
         });
-
-      // });
     } else {
       let centerx = document.documentElement.clientWidth / 2;
       let centery = document.documentElement.clientHeight / 2;

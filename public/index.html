@@ -13,18 +13,22 @@
 <body>
   <div id="cesiumContainer" ></div>
   <div class="backdrop" id="menu">
-    <button class="collapsible"　id="modelList">配置リスト</button>
+    <button class="collapsible"　id="modelList">マップに配置されているオブジェクト</button>
     <div  class="content">
-      <table id="modelListContainer">
+      <table >
+        <thead><th>Name</th><th>Model</th></thead>
+        <tbody id="modelListContainer"></tbody>
       </table>
     </div>
-    <button class="collapsible"　id="addAssetModel"> 3Dモデルを追加</button>
-      <div id="addModelButtons" class="content">
+    <button class="collapsible"　id="addAssetModel"> アセットをマップへ追加</button>
+      <div  class="content">
+        <div>3Dカーソルの位置に配置されます</div>
+        <div id="addModelButtons"></div>
       </div>
-    <button class="collapsible" id="addNewModel">新しい3Dモデルをアップロード</button>
+    <button class="collapsible" id="addNewModel">新しいアセットをアップロード</button>
       <div class="content">
-        <p>現在 <a style="color:aqua" href="https://docs.blender.org/manual/ja/dev/addons/import_export/scene_gltf2.html#gltf-embedded-gltf" target="_blank" rel="noopener noreferrer">glTF2.0</a>形式の3DObjectのみアップロード可能</p>
-        <p>拡散子を「.gltf」にしてください。</p>
+        <div>現在 「glTF2.0」形式のみ対応</div>
+        <div>拡散子を「.gltf」にしてください。</div>
           <input id="gltfInput" type="file" accept=".gltf" onchange="onFileSelect( this );">
           <input id="newModelName" type="text">
           <button id="uploadNewModel">アップロード</button>
@@ -38,10 +42,10 @@
           <button onClick="flyToSelectedModel()">モデルへ飛ぶ</button>
         </tr>
         <tr>
-          <td>Model ID</td><td id="modelId" ></td>
+          <td>ID</td><td id="modelId" ></td>
         </tr>
         <tr>
-          <td>Model Name</td><td  ><input id="modelName" type="text" onchange="changeModelProperty()"></td>
+          <td>Name</td><td  ><input id="modelName" type="text" onchange="changeModelProperty()"></td>
         </tr>
         <tr>
           <td>緯度</td><td><input id="modelLatitude" type="number"  onchange="changeModelProperty()">°</td>
@@ -51,6 +55,25 @@
         </tr>
         <tr>
           <td>高さ</td><td><input id="modelHeight" type="number"   onchange="changeModelProperty()">m</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><button id="copyLatLon">3Dカーソルへ移動</button></td> 
+        </tr>
+        <tr>
+          <td>回転</td>
+          <td class="xyzgrid" >
+            <div> X:</div>
+            <div><input type="number" style="width:40px;"/></div>
+            <div>Y:</div>
+            <div><input type="number" style="width:40px;"/></div>
+            <div>Z:</div>
+            <div><input type="number" style="width:40px;"/></div>
+          </td>
+        </tr>
+        <tr>
+          <td>スケール</td>
+          <td><input type="number" style="width:50px;"/></td>
         </tr>
       </table>
       <div>
@@ -79,22 +102,21 @@
         <a-entity
           camera
           look-controls
-          orbit-controls="target: 0 1.6 -0.5; minDistance: 0.5; maxDistance: 180; initialPosition: 0 5 15"
+          orbit-controls="target: 0 1.6 -0.5; minDistance: 0.5; maxDistance: 500; initialPosition: 0 5 15"
         ></a-entity>
         </a-scene>
       </div>
       <table>
         <tr>
-          <td>名前の表示</td><td><input type="checkbox" id="modelLabel" onchange="changeModelData()"/></td>
+          <td>名前表示<input type="checkbox" id="modelLabel" onchange="changeModelData()"/></td>
+      
+          <td>距離表示<input type="checkbox" id="modelDistance" onchange="changeModelData()"/></td>
         </tr>
         <tr>
-          <td>距離の表示</td><td><input type="checkbox" id="modelDistance" onchange="changeModelData()"/></td>
+          <td>リンク</td><td><input  id="modelLink" onchange="changeModelData()" placeholder="https://"/></td>
         </tr>
         <tr>
-          <td>リンク</td><td><input  id="modelLink" onchange="changeModelData()"/></td>
-        </tr>
-        <tr>
-          <td>キャプション</td><td><input id="modelCaption" onchange="changeModelData()"/></td>
+          <td>作品説明</td><td><textarea cols="25" rows="5" id="modelCaption" onchange="changeModelData()" placeholder="HTML形式で書けます"></textarea></td>
         </tr>
         <td><button id="deleteModel">削除</button></td>
       </table>
@@ -104,8 +126,8 @@
   <div class="backdrop" id="rightclickposition">
     <table>
       <tr>
-        <td>右クリック位置</td>
-        <td><button id="copyLatLon">貼り付ける</button></td> 
+        <td><strong>3Dカーソル位置</strong> </td>
+        <td style="color: rgb(250, 203, 203);">右クリックで指定</td> 
       </tr>
       <tr>
         <td>

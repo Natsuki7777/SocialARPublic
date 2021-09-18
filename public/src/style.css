@@ -34,19 +34,19 @@ body {
 #menu {
   position: absolute;
   left: 5px;
-  top: 5px;
+  top: 120px;
   width: 320px;
 }
 #modelView {
   position: absolute;
   right: 5px;
-  top: 5px;
+  top: 40px;
   width: 320px;
 }
 #rightclickposition {
   position: absolute;
-  right: 5px;
-  bottom: 30px;
+  left: 5px;
+  top: 5px;
   width: 320px;
 }
 .backdrop {
@@ -89,5 +89,13 @@ a-scene {
   display: none;
 } */
 .entityButton:hover{
-  background-color:grey;
+  background-color:rgb(120, 155, 161);
+}
+table td{
+  margin:  0  5px 0 0;
+}
+.xyzgrid{
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr  3fr 1fr 3fr ;
+  text-align: right;
 }
