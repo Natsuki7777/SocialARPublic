@@ -94,15 +94,11 @@ var tileset3 = viewer.scene.primitives.add(
 );
 
 var initialPosition = new Cesium.Cartesian3.fromDegrees(
-  139.6864690639537,
-  35.603949084082174,
-  300
+  139.83553837295884,
+  35.474996810820514,
+  50000
 );
-var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(
-  -27.1077496389876024807,
-  -41.987223091598949054,
-  0.025883251314954971306
-);
+var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(0, -70, 0);
 var homeCameraView = {
   destination: initialPosition,
   orientation: {
@@ -135,10 +131,16 @@ function createEntities(data) {
     let x = gltf.location.longitude;
     let y = gltf.location.latitude;
     let terrainProvider = viewer.terrainProvider;
-    var heading = Cesium.Math.toRadians(90);
-    let pitch = 0;
-    let roll = 0;
+
+    let rotation = gltf.rotation;
+    console.log(gltf);
+    //! -----おそらくここでバグるから注意
+    let heading = Cesium.Math.toRadians(90 + rotation.z);
+    let pitch = Cesium.Math.toRadians(rotation.x);
+    let roll = Cesium.Math.toRadians(rotation.y);
     let hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+
+    let scale = gltf.scale;
 
     // List でないとダメ！！！！！！
     let positions = [Cesium.Cartographic.fromDegrees(x, y)];
@@ -159,7 +161,9 @@ function createEntities(data) {
           entity = viewer.entities.getById(ID);
           entity.name = gltf.name;
           entity.position = position;
+          entity.orientation = orientation;
           entity.model.uri = url;
+          entity.model.scale = scale.x;
           entity.dataRef = gltf;
         } else {
           viewer.entities.add({
@@ -169,6 +173,7 @@ function createEntities(data) {
             orientation: orientation,
             model: {
               uri: url,
+              scale: scale.x,
             },
             label: {
               text: `${gltf.name}`,
@@ -183,18 +188,6 @@ function createEntities(data) {
             dataRef: gltf,
           });
         }
-        // if (document.getElementById(`addButton${gltf.model}`)) {
-        // } else {
-        //   const addModelButton = document.createElement("button");
-        //   addModelButton.innerHTML = gltf.model;
-        //   addModelButton.id = `addButton${gltf.model}`;
-        //   addModelButton.addEventListener("click", () => {
-        //     add3Dmodel(data, gltf.model);
-        //   });
-        //   document
-        //     .getElementById("addModelButtons")
-        //     .appendChild(addModelButton);
-        // }
         if (document.getElementById(`entityListID${ID}`)) {
         } else {
           let modelListContainer =
@@ -230,9 +223,6 @@ function pickEntity(viewer, windowPosition) {
       console.dir(entity.dataRef);
       console.log(entity.model.uri.getValue());
       console.log(entity.id);
-      // console.log(entity.position);
-      // let cartesian = entity.position.getValue();
-      // var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
       showOnViewer(id);
     }
   }
@@ -246,6 +236,11 @@ function showOnViewer(id) {
   document.getElementById("modelLatitude").value = gltf.location.latitude;
   document.getElementById("modelLongitude").value = gltf.location.longitude;
   document.getElementById("modelHeight").value = gltf.location.height;
+  document.getElementById("modelrotationx").value = gltf.rotation.x;
+  document.getElementById("modelrotationy").value = gltf.rotation.y;
+  document.getElementById("modelrotationz").value = gltf.rotation.z;
+  document.getElementById("modelscale").value = gltf.scale.x;
+
   document.getElementById("modelLabel").checked = gltf.label;
   document.getElementById("modelDistance").checked = gltf.distance;
   document.getElementById("modelLink").value = gltf.link;
@@ -298,21 +293,16 @@ function changeModelProperty() {
   let latitude = parseFloat(document.getElementById("modelLatitude").value);
   let longitude = parseFloat(document.getElementById("modelLongitude").value);
   let height = parseFloat(document.getElementById("modelHeight").value);
-  // let entity = viewer.entities.getById(id);
-  //------- firebase 側がレンダリングを自動でしてくれる
-  // let terrainProvider = Cesium.createWorldTerrain();
-  // // List でないとダメ！！！！！！
-  // let positions = [Cesium.Cartographic.fromDegrees(longitude, latitude)];
-  // let promise = Cesium.sampleTerrainMostDetailed(terrainProvider, positions);
-  // Cesium.when(promise, function (updatedPositions) {
-  //   console.log(updatedPositions);
-  //   let updateheight = height + updatedPositions[0].height;
-  //   let finalposition = Cesium.Cartesian3.fromDegrees(
-  //     longitude,
-  //     latitude,
-  //     updateheight
-  //   );
-  //   entity.position = finalposition;
+  let rotation = {
+    x: parseFloat(document.getElementById("modelrotationx").value),
+    y: parseFloat(document.getElementById("modelrotationy").value),
+    z: parseFloat(document.getElementById("modelrotationz").value),
+  };
+  let scale = {
+    x: parseFloat(document.getElementById("modelscale").value),
+    y: parseFloat(document.getElementById("modelscale").value),
+    z: parseFloat(document.getElementById("modelscale").value),
+  };
 
   //-------realtimedatabase の方も変更-----------------
   modelRef.child(`/${id}`).update({
@@ -321,6 +311,16 @@ function changeModelProperty() {
       latitude: latitude,
       longitude: longitude,
       height: height,
+    },
+    rotation: {
+      x: rotation.x,
+      y: rotation.y,
+      z: rotation.z,
+    },
+    scale: {
+      x: scale.x,
+      y: scale.y,
+      z: scale.z,
     },
   });
   // });
@@ -476,6 +476,16 @@ function add3Dmodel(data, model) {
           longitude: positionLongitude,
           height: 10,
         },
+        rotation: {
+          x: 0,
+          y: 0,
+          z: 0,
+        },
+        scale: {
+          x: 1.0,
+          y: 1.0,
+          z: 1.0,
+        },
         model: modelName,
         label: false,
         minDistance: 0,
@@ -505,6 +515,16 @@ function add3Dmodel(data, model) {
           latitude: positionLatitude,
           longitude: positionLongitude,
           height: 0,
+        },
+        rotation: {
+          x: 0,
+          y: 0,
+          z: 0,
+        },
+        scale: {
+          x: 1.0,
+          y: 1.0,
+          z: 1.0,
         },
         model: modelName,
         label: false,
@@ -550,50 +570,3 @@ function newModelUploadAndAdd(gltfModels) {
       );
   }
 }
-
-//------------infoBox で操作しようとした残骸---------------
-// viewer.infoBox.frame.removeAttribute("sandbox");
-// viewer.infoBox.frame.src = "about:blank";
-// console.log(viewer.infoBox.frame);
-
-// function entityDescription(model) {
-//   let x = model.location.lng;
-//   let y = model.location.lat;
-//   let url = `./src/assets/${model.model_type}/${model.model_type}.gltf`;
-//   let description = url;
-//   // `<iframe
-//   //       src="http://127.0.0.1:5500/ARArrangementUI/src/modelbox.html"
-//   //       frameborder="0"
-//   //     ></iframe>`;
-
-//   //   `<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-//   //   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-//   //   <script src="https://unpkg.com/aframe-orbit-controls@1.2.0/dist/aframe-orbit-controls.min.js"></script>
-//   //     `<a-scene vr-mode-ui="enabled: false">
-//   //     <a-assets>
-//   //       <a-asset-item id="pin" src="./assets/pin/pin.gltf"></a-asset-item>
-//   //     </a-assets>
-//   //     <a-sky color="#ECECEC"></a-sky>
-//   //     <a-entity
-//   //       camera
-//   //       look-controls
-//   //       orbit-controls="target: 0 1.6 -0.5; minDistance: 0.5; maxDistance: 180; initialPosition: 0 5 15"
-//   //     ></a-entity>
-//   //   </a-scene>
-
-//   // <script>
-//   //   var scene = document.querySelector("a-scene");
-//   //   let model = document.createElement("a-entity");
-//   //   var model_type = "pin";
-//   //   model.setAttribute(
-//   //     "gltf-model",
-//   //     ${url}
-//   //   );
-//   //   model.setAttribute("animation-mixer", "");
-//   //   model.setAttribute("response-type", "arraybuffer");
-
-//   //   scene.appendChild(model);
-//   // </script>
-//   //    `;
-//   return description;
-// }
